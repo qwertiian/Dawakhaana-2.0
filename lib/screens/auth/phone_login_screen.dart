@@ -54,7 +54,6 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Login with Phone'),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

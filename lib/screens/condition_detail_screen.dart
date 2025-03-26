@@ -1,165 +1,104 @@
 import 'package:flutter/material.dart';
 import '/models/condition.dart';
-import '/models/symptom.dart';
-import '/services/api_service.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
-import '/widgets/custom_app_bar.dart';
 
-class ConditionDetailScreen extends StatefulWidget {
+class ConditionDetailScreen extends StatelessWidget {
   final Condition condition;
 
   const ConditionDetailScreen({super.key, required this.condition});
 
   @override
-  _ConditionDetailScreenState createState() => _ConditionDetailScreenState();
-}
-
-class _ConditionDetailScreenState extends State<ConditionDetailScreen> {
-  final ApiService _apiService = ApiService();
-  late Future<List<Symptom>> _symptomsFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _symptomsFuture = _apiService.getSymptomsForCondition(widget.condition.id);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: widget.condition.name,
-        showBackButton: true,
+      appBar: AppBar(
+        title: Text(condition.name),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                widget.condition.imageUrl,
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(height: 16),
             Text(
-              widget.condition.name,
-              style: Styles.headingStyle,
+              condition.name,
+              style: Styles.headingStyle.copyWith(fontSize: 24),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Chip(
-                  label: Text(
-                    widget.condition.category,
-                    style: Styles.captionStyle.copyWith(color: Colors.white),
-                  ),
-                  backgroundColor: AppConstants.secondaryColor,
-                ),
-                const SizedBox(width: 8),
-                Chip(
-                  label: Text(
-                    widget.condition.prevalence,
-                    style: Styles.captionStyle.copyWith(color: Colors.white),
-                  ),
-                  backgroundColor: AppConstants.accentColor,
-                ),
-              ],
+            Chip(
+              label: Text(condition.category),
+              backgroundColor: AppConstants.lightGray,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
               'Description',
               style: Styles.subheadingStyle,
             ),
             const SizedBox(height: 8),
             Text(
-              widget.condition.description,
+              condition.description,
               style: Styles.bodyStyle,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
               'Common Symptoms',
               style: Styles.subheadingStyle,
             ),
             const SizedBox(height: 8),
-            FutureBuilder<List<Symptom>>(
-              future: _symptomsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No symptoms found');
-                } else {
-                  return Column(
-                    children: snapshot.data!
-                        .map((symptom) => ListTile(
-                      title: Text(symptom.name),
-                      subtitle: Text(symptom.category),
-                      trailing: Chip(
-                        label: Text(
-                          symptom.severity,
-                          style: Styles.captionStyle.copyWith(
-                              color: Colors.white),
-                        ),
-                        backgroundColor: _getSeverityColor(symptom.severity),
-                      ),
-                    ))
-                        .toList(),
-                  );
-                }
-              },
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: condition.symptoms
+                  .map((symptom) => Chip(
+                label: Text(symptom),
+              ))
+                  .toList(),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
-              'Treatment Options',
+              'Recommended Actions',
               style: Styles.subheadingStyle,
             ),
             const SizedBox(height: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: widget.condition.treatments
-                  .map((treatment) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.check_circle,
-                        size: 16, color: AppConstants.secondaryColor),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        treatment,
-                        style: Styles.bodyStyle,
-                      ),
-                    ),
-                  ],
+            ...condition.treatments.map((treatment) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.circle, size: 8),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(treatment)),
+                ],
+              ),
+            )),
+            const SizedBox(height: 32),
+            const Divider(),
+            const SizedBox(height: 16),
+            Text(
+              'Important Notice',
+              style: Styles.subheadingStyle.copyWith(color: Colors.red),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'This information is for educational purposes only and does not constitute medical advice. Always consult with a qualified healthcare professional for proper diagnosis and treatment.',
+              style: Styles.captionStyle,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to telemedicine
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppConstants.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-              ))
-                  .toList(),
+                child: const Text('Consult a Doctor'),
+              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Color _getSeverityColor(String severity) {
-    switch (severity.toLowerCase()) {
-      case 'high':
-        return Colors.red;
-      case 'medium':
-        return Colors.orange;
-      case 'low':
-        return Colors.green;
-      default:
-        return AppConstants.darkGray;
-    }
   }
 }

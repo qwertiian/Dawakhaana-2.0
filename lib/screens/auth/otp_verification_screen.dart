@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../location_access_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
-import '/widgets/custom_app_bar.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -53,7 +52,6 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   }
 
   void _verifyOTP() {
-    // Bypass actual verification for testing
     _navigateToLocationScreen();
   }
 
@@ -101,7 +99,15 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Verify OTP', showBackButton: true),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppConstants.primaryColor),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(''), // Empty title
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -112,104 +118,115 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Verify OTP",
-                  style: Styles.headingStyle.copyWith(
-                    fontSize: 32,
-                    color: AppConstants.primaryColor,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 500,
+                minHeight: MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    kToolbarHeight,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Verify OTP",
+                    style: Styles.headingStyle.copyWith(
+                      fontSize: 32,
+                      color: AppConstants.primaryColor,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "Enter OTP sent to +91${widget.phoneNumber}",
-                  style: Styles.bodyStyle.copyWith(color: AppConstants.darkGray),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Time remaining: ${_otpTimer ~/ 60}:${(_otpTimer % 60).toString().padLeft(2, '0')}",
-                  style: Styles.captionStyle.copyWith(
-                    color: _isOTPExpired ? Colors.red : AppConstants.darkGray,
+                  const SizedBox(height: 20),
+                  Text(
+                    "Enter OTP sent to +91${widget.phoneNumber}",
+                    style: Styles.bodyStyle.copyWith(color: AppConstants.darkGray),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 30),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                  const SizedBox(height: 10),
+                  Text(
+                    "Time remaining: ${_otpTimer ~/ 60}:${(_otpTimer % 60).toString().padLeft(2, '0')}",
+                    style: Styles.captionStyle.copyWith(
+                      color: _isOTPExpired ? Colors.red : AppConstants.darkGray,
+                    ),
                   ),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _otpController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: "OTP",
-                          errorText: _errorMessage,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          counterText: "",
+                  const SizedBox(height: 30),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 2,
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
                         ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(6),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: (_isOTPEntered && !_isOTPExpired && !_isLoading)
-                              ? _verifyOTP
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: (_isOTPEntered && !_isOTPExpired && !_isLoading)
-                                ? AppConstants.primaryColor
-                                : Colors.grey,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _otpController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 18),
+                          decoration: InputDecoration(
+                            labelText: "OTP",
+                            errorText: _errorMessage,
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            counterText: "",
                           ),
-                          child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : Text(
-                            "Verify",
-                            style: Styles.buttonTextStyle,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(6),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: (_isOTPEntered && !_isOTPExpired && !_isLoading)
+                                ? _verifyOTP
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: (_isOTPEntered && !_isOTPExpired && !_isLoading)
+                                  ? AppConstants.primaryColor
+                                  : Colors.grey,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : Text(
+                              "Verify",
+                              style: Styles.buttonTextStyle,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      TextButton(
-                        onPressed: _isResendEnabled ? _resendOTP : null,
-                        child: Text(
-                          _isResendEnabled
-                              ? "Resend OTP"
-                              : "Resend OTP in ${_resendCooldown ~/ 60}:${(_resendCooldown % 60).toString().padLeft(2, '0')}",
-                          style: Styles.linkStyle.copyWith(
-                            color: _isResendEnabled
-                                ? AppConstants.primaryColor
-                                : AppConstants.darkGray,
+                        const SizedBox(height: 20),
+                        TextButton(
+                          onPressed: _isResendEnabled ? _resendOTP : null,
+                          child: Text(
+                            _isResendEnabled
+                                ? "Resend OTP"
+                                : "Resend OTP in ${_resendCooldown ~/ 60}:${(_resendCooldown % 60).toString().padLeft(2, '0')}",
+                            style: Styles.linkStyle.copyWith(
+                              color: _isResendEnabled
+                                  ? AppConstants.primaryColor
+                                  : AppConstants.darkGray,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
