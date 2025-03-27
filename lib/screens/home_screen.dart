@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
             ...healthServices.map((service) =>
                 Text('- ${service['voiceCommand']}', style: Styles.bodyStyle)
-            ).toList(),
+            ),
             const SizedBox(height: 20),
             const Text('Tap the mic and say a command', style: TextStyle(fontStyle: FontStyle.italic)),
           ],

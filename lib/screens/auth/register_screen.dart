@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '/screens/auth/login_screen.dart';
 import '/screens/auth/otp_verification_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
-import '/widgets/custom_app_bar.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

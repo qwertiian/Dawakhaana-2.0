@@ -28,7 +28,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   int _resendAttempts = 0;
   bool _isOTPExpired = false;
   int _otpTimer = 60;
-  bool _isLoading = false;
+  final bool _isLoading = false;
   String? _errorMessage;
 
   @override

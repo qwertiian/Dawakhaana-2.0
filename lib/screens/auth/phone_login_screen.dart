@@ -4,7 +4,6 @@ import 'otp_verification_screen.dart';
 import 'register_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
-import '/widgets/custom_app_bar.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
   const PhoneLoginScreen({super.key});
@@ -15,7 +14,7 @@ class PhoneLoginScreen extends StatefulWidget {
 
 class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool _isButtonEnabled = false;
   String? _errorMessage;
 

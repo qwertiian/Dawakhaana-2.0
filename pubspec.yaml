@@ -37,9 +37,10 @@ dependencies:
   # State Management
   provider: ^6.1.2 # Added from the second version
 
+  http: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   # Linting
-  flutter_lints: ^5.0.0 # Using the latest version for better linting support
+  flutter_lints: ^5.0.0 # Using the latest version for better linting support  flutter_projects: any

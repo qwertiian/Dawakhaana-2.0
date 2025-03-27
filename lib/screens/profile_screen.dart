@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '/utils/constants.dart';
-import '/utils/styles.dart';
 import 'profile_overlay.dart';
 
 class ProfileScreen extends StatelessWidget {

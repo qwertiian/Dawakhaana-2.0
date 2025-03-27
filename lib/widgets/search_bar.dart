@@ -5,7 +5,6 @@ import '/screens/symptom_checker_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
 import '/widgets/custom_app_bar.dart';
-import '/widgets/search_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
