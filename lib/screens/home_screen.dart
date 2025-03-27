@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '/screens/profile_screen.dart';
-import '/screens/search_screen.dart';
 import '/screens/symptom_checker_screen.dart';
 import '/screens/skin_disease_scanner.dart';
 import '/screens/telemedicine_screen.dart';
@@ -10,6 +8,7 @@ import '/screens/emergency_guide_screen.dart';
 import '/screens/health_awareness_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
+import 'ngo_join_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,61 +18,168 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _selectedLanguage = 'English';
-
   final List<Map<String, dynamic>> healthServices = [
     {
       'title': 'Symptom Checker',
-      'description': 'Use AI to check your symptoms and get guidance on potential health issues.',
+      'description': 'Check symptoms using AI & get guidance.',
       'icon': Icons.medical_services,
       'color': Colors.blue,
       'screen': const SymptomCheckerScreen(),
+      'voiceCommand': 'symptom checker',
     },
     {
-      'title': 'Skin Disease Scanner',
-      'description': 'Scan skin conditions and get AI analysis for potential skin diseases.',
+      'title': 'Skin Scanner',
+      'description': 'Scan skin conditions & get AI analysis.',
       'icon': Icons.camera_alt,
       'color': Colors.green,
       'screen': const SkinDiseaseScannerScreen(),
+      'voiceCommand': 'skin scanner',
     },
     {
       'title': 'Telemedicine',
-      'description': 'Connect with healthcare professionals remotely for consultations.',
+      'description': 'Connect with doctors remotely.',
       'icon': Icons.video_call,
       'color': Colors.purple,
       'screen': const TelemedicineScreen(),
+      'voiceCommand': 'telemedicine',
     },
     {
       'title': 'Medicine Finder',
-      'description': 'Find available medicines and treatments in your nearby area.',
+      'description': 'Find medicines in nearby stores.',
       'icon': Icons.local_pharmacy,
       'color': Colors.orange,
       'screen': const MedicineFinderScreen(),
+      'voiceCommand': 'medicine finder',
     },
     {
       'title': 'Emergency Guide',
-      'description': 'Access emergency and first aid guidance when you need it most.',
+      'description': 'Get first aid & emergency help.',
       'icon': Icons.emergency,
       'color': Colors.red,
       'screen': const EmergencyGuideScreen(),
+      'voiceCommand': 'emergency guide',
     },
     {
       'title': 'Health Awareness',
-      'description': 'Learn about preventive care and improve your health awareness.',
+      'description': 'Learn preventive healthcare tips.',
       'icon': Icons.health_and_safety,
       'color': Colors.teal,
       'screen': const HealthAwarenessScreen(),
+      'voiceCommand': 'health awareness',
     },
   ];
 
-  final List<Map<String, dynamic>> languages = [
-    {'name': 'English', 'code': 'en'},
-    {'name': 'Hindi', 'code': 'hi'},
-    {'name': 'Marathi', 'code': 'mr'},
-    {'name': 'Kannada', 'code': 'kn'},
-    {'name': 'Bengali', 'code': 'bn'},
-    {'name': 'Tamil', 'code': 'ta'},
-  ];
+  void _showVoiceCommandDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Voice Assistant'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Available voice commands:'),
+            const SizedBox(height: 10),
+            ...healthServices.map((service) =>
+                Text('- ${service['voiceCommand']}', style: Styles.bodyStyle)
+            ).toList(),
+            const SizedBox(height: 20),
+            const Text('Tap the mic and say a command', style: TextStyle(fontStyle: FontStyle.italic)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.mic, color: Colors.redAccent),
+            onPressed: () {
+              Navigator.pop(context);
+              _simulateVoiceCommandSelection(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _simulateVoiceCommandSelection(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Select a voice command to simulate'),
+        children: healthServices.map((service) =>
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context);
+                _handleVoiceCommand(service['voiceCommand']);
+              },
+              child: Text(service['title']),
+            )
+        ).toList(),
+      ),
+    );
+  }
+
+  void _handleVoiceCommand(String command) {
+    for (var service in healthServices) {
+      if (service['voiceCommand'].toLowerCase() == command.toLowerCase()) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => service['screen']),
+        );
+        return;
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('No service found for command: $command')),
+    );
+  }
+
+  Widget _buildAppName() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            AppConstants.primaryColor.withOpacity(0.2),
+            Colors.white.withOpacity(0.3),
+            AppConstants.primaryColor.withOpacity(0.2),
+          ],
+        ),
+        border: Border.all(
+          color: AppConstants.primaryColor.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        'Dawakhaana',
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          color: AppConstants.primaryColor,
+          letterSpacing: 1.1,
+          shadows: [
+            Shadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 2,
+              offset: const Offset(1, 1),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,195 +194,151 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
-        title: const SearchBar(),
+        title: _buildAppName(),
+        centerTitle: true,
         actions: [
-          DropdownButton<String>(
-            value: _selectedLanguage,
-            icon: const Icon(Icons.language),
-            underline: Container(),
-            items: languages.map((language) {
-              return DropdownMenuItem<String>(
-                value: language['name'],
-                child: Text(language['name']),
+          IconButton(
+            icon: const Icon(Icons.mic, size: 28, color: Colors.redAccent),
+            onPressed: () => _showVoiceCommandDialog(context),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NGOJoinScreen()),
               );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedLanguage = newValue!;
-                // TODO: Implement language change logic
-              });
             },
+            child: Text(
+              'Join',
+              style: Styles.buttonTextStyle.copyWith(color: AppConstants.primaryColor),
+            ),
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header Section
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-                image: const DecorationImage(
-                  image: AssetImage('assets/ai_medical_logo.png'),
-                  alignment: Alignment.centerRight,
-                  opacity: 0.3,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'AI-Powered Healthcare',
+                      style: Styles.headingStyle.copyWith(fontSize: 24),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Access quality healthcare services using AI-powered tools and expert guidance.',
+                      style: Styles.bodyStyle,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppConstants.primaryColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'AI-Powered Healthcare For Rural Communities',
-                      style: Styles.bodyStyle.copyWith(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Welcome to Your Health Assistant',
-                    style: Styles.headingStyle.copyWith(fontSize: 28),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Access quality healthcare services regardless of your location. Get AI symptom analysis, connect with doctors remotely, and find treatments available near you.',
-                    style: Styles.bodyStyle,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const SymptomCheckerScreen()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstants.primaryColor,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        ),
-                        child: Text('Symptom Checker', style: Styles.buttonTextStyle),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const EmergencyGuideScreen()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        ),
-                        child: Text('Emergency Guide', style: Styles.buttonTextStyle.copyWith(color: Colors.white)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
-            // Health Services Section
-            Text(
-              'Health Services',
-              style: Styles.headingStyle.copyWith(fontSize: 24),
-            ),
-            const SizedBox(height: 16),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+              Center(
+                child: Text(
+                  'Health Services',
+                  style: Styles.headingStyle.copyWith(fontSize: 22),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              itemCount: healthServices.length,
-              itemBuilder: (context, index) {
-                final service = healthServices[index];
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => service['screen']),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(service['icon'], size: 40, color: service['color']),
-                          const SizedBox(height: 8),
-                          Text(
-                            service['title'],
-                            style: Styles.subheadingStyle,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            service['description'],
-                            style: Styles.captionStyle,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                          ),
-                        ],
+              const SizedBox(height: 12),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.1,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: healthServices.length,
+                itemBuilder: (context, index) {
+                  final service = healthServices[index];
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => service['screen']),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(service['icon'], size: 36, color: service['color']),
+                            const SizedBox(height: 6),
+                            Text(
+                              service['title'],
+                              style: Styles.subheadingStyle.copyWith(fontSize: 14),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                service['description'],
+                                style: Styles.captionStyle.copyWith(fontSize: 12),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 32),
-
-            // How It Works Section
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              color: Colors.grey[50],
-              child: Column(
-                children: [
-                  Text(
-                    'How It Works',
-                    style: Styles.headingStyle.copyWith(fontSize: 24),
-                  ),
-                  const SizedBox(height: 24),
-                  const StepItem(
-                    number: 1,
-                    title: 'Select Service',
-                    description: 'Choose from symptom checker, skin scanner, telemedicine, or other services.',
-                  ),
-                  const StepItem(
-                    number: 2,
-                    title: 'Follow Guidance',
-                    description: 'Enter symptoms, upload images, or connect with healthcare providers as needed.',
-                  ),
-                  const StepItem(
-                    number: 3,
-                    title: 'Get Results',
-                    description: 'Receive AI analysis, doctor consultations, or nearby treatment information.',
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+
+              Center(
+                child: Text(
+                  'How It Works',
+                  style: Styles.headingStyle.copyWith(fontSize: 22),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const StepItem(
+                number: 1,
+                title: 'Select Service',
+                description: 'Choose a healthcare service to use.',
+              ),
+              const StepItem(
+                number: 2,
+                title: 'Follow Guidance',
+                description: 'Provide symptoms or use AI tools.',
+              ),
+              const StepItem(
+                number: 3,
+                title: 'Get Results',
+                description: 'Receive AI analysis or expert advice.',
+              ),
+              const SizedBox(height: 24),
+
+              const Footer(),
+            ],
+          ),
         ),
       ),
     );
@@ -298,31 +360,19 @@ class StepItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppConstants.primaryColor,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                number.toString(),
-                style: Styles.headingStyle.copyWith(color: Colors.white),
-              ),
-            ),
+          CircleAvatar(
+            backgroundColor: AppConstants.primaryColor,
+            child: Text(number.toString(), style: Styles.headingStyle.copyWith(color: Colors.white)),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: Styles.subheadingStyle),
-                const SizedBox(height: 4),
                 Text(description, style: Styles.bodyStyle),
               ],
             ),
@@ -333,49 +383,23 @@ class StepItem extends StatelessWidget {
   }
 }
 
-class SearchBar extends StatelessWidget {
-  const SearchBar({super.key});
+class Footer extends StatelessWidget {
+  const Footer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.6,
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 16),
-          const Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.mic),
-            onPressed: () {
-              // TODO: Implement voice search
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SearchScreen()),
-              );
-            },
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        const Divider(),
+        const SizedBox(height: 10),
+        Text('Dawakhaana - Your AI-Powered Health Companion',
+            style: Styles.subheadingStyle, textAlign: TextAlign.center),
+        const SizedBox(height: 5),
+        Text('Contact: support@dawakhaana.com | Privacy Policy', style: Styles.captionStyle),
+        const SizedBox(height: 5),
+        Text('Disclaimer: This app does not replace professional medical advice.', style: Styles.captionStyle),
+        const SizedBox(height: 10),
+      ],
     );
   }
 }
