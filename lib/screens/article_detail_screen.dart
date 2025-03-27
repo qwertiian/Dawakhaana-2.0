@@ -6,6 +6,7 @@ import '/widgets/custom_app_bar.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   final Article article;
+  const main;
 
   const ArticleDetailScreen({super.key, required this.article});
 
