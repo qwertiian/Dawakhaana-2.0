@@ -11,19 +11,16 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # razorpay integration
-  razorpay_flutter: ^1.3.7
-
   # location access enable
   location: ^8.0.0
 
   # UI and Icons
   cupertino_icons: ^1.0.8 # Using the latest version
 
-  # Firebase Dependencies
-  firebase_core: ^3.12.0 # Using the latest stable version
-  firebase_auth: ^5.5.0 # Using the latest stable version
-  cloud_firestore: ^5.6.4 # Added from the first version
+  supabase_flutter: ^2.8.4
+  dio: ^5.8.0+1
+  flutter_secure_storage: ^9.2.4
+  intl: ^0.20.2
 
   # Geolocation
   geolocator: ^13.0.2 # Using the latest version
@@ -37,9 +34,10 @@ dependencies:
   # State Management
   provider: ^6.1.2 # Added from the second version
 
+  http: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   # Linting
-  flutter_lints: ^5.0.0 # Using the latest version for better linting support
+  flutter_lints: ^5.0.0 # Using the latest version for better linting support  flutter_projects: any

@@ -6,7 +6,6 @@ import '/services/api_service.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
 import '/widgets/custom_app_bar.dart';
-import '/widgets/search_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
