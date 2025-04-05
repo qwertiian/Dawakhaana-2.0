@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '/models/article.dart';
-import '/models/condition.dart';
-import '/models/symptom.dart';
-import '/services/api_service.dart';
-import '/utils/constants.dart';
-import '/utils/styles.dart';
-import '/widgets/custom_app_bar.dart';
+import '../models/article.dart';
+import '../models/condition.dart';
+import '../models/symptom.dart';
+import '../services/api_service.dart';
+import '../utils/constants.dart';
+import '../utils/styles.dart';
+import '../widgets/custom_app_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -25,6 +25,10 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
     _symptomsFuture = _apiService.getSymptoms();
     _conditionsFuture = _apiService.getConditions();
     _articlesFuture = _apiService.getArticles();
@@ -41,8 +45,15 @@ class _SearchScreenState extends State<SearchScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: SearchBar(
+            child: TextField(
               controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value.toLowerCase();
@@ -97,7 +108,7 @@ class _SearchScreenState extends State<SearchScreen> {
           final filteredSymptoms = snapshot.data!
               .where((symptom) =>
           symptom.name.toLowerCase().contains(_searchQuery) ||
-              symptom.category.toLowerCase().contains(_searchQuery))
+              (symptom.category?.toLowerCase().contains(_searchQuery) ?? false))
               .toList();
 
           return ListView.builder(
@@ -107,14 +118,14 @@ class _SearchScreenState extends State<SearchScreen> {
               final symptom = filteredSymptoms[index];
               return ListTile(
                 title: Text(symptom.name),
-                subtitle: Text(symptom.category),
-                trailing: Chip(
+                subtitle: symptom.category != null ? Text(symptom.category!) : null,
+                trailing: symptom.severity != null ? Chip(
                   label: Text(
-                    symptom.severity,
+                    symptom.severity!,
                     style: Styles.captionStyle.copyWith(color: Colors.white),
                   ),
-                  backgroundColor: _getSeverityColor(symptom.severity),
-                ),
+                  backgroundColor: _getSeverityColor(symptom.severity!),
+                ) : null,
                 onTap: () {
                   // Navigate to symptom detail
                 },
@@ -140,7 +151,7 @@ class _SearchScreenState extends State<SearchScreen> {
           final filteredConditions = snapshot.data!
               .where((condition) =>
           condition.name.toLowerCase().contains(_searchQuery) ||
-              condition.category.toLowerCase().contains(_searchQuery))
+              (condition.category?.toLowerCase().contains(_searchQuery) ?? false))
               .toList();
 
           return ListView.builder(
@@ -150,14 +161,14 @@ class _SearchScreenState extends State<SearchScreen> {
               final condition = filteredConditions[index];
               return ListTile(
                 title: Text(condition.name),
-                subtitle: Text(condition.category),
-                trailing: Chip(
+                subtitle: condition.category != null ? Text(condition.category!) : null,
+                trailing: condition.prevalence != null ? Chip(
                   label: Text(
-                    condition.prevalence,
+                    condition.prevalence!,
                     style: Styles.captionStyle.copyWith(color: Colors.white),
                   ),
                   backgroundColor: AppConstants.accentColor,
-                ),
+                ) : null,
                 onTap: () {
                   // Navigate to condition detail
                 },
@@ -183,7 +194,7 @@ class _SearchScreenState extends State<SearchScreen> {
           final filteredArticles = snapshot.data!
               .where((article) =>
           article.title.toLowerCase().contains(_searchQuery) ||
-              article.author.toLowerCase().contains(_searchQuery) ||
+              (article.author?.toLowerCase().contains(_searchQuery) ?? false) ||
               article.tags.any((tag) => tag.toLowerCase().contains(_searchQuery)))
               .toList();
 
@@ -194,7 +205,7 @@ class _SearchScreenState extends State<SearchScreen> {
               final article = filteredArticles[index];
               return ListTile(
                 title: Text(article.title),
-                subtitle: Text('By ${article.author} • ${article.date}'),
+                subtitle: Text('By ${article.author ?? 'Unknown'} • ${article.date ?? ''}'),
                 onTap: () {
                   // Navigate to article detail
                 },

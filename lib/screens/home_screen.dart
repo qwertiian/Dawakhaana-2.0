@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (service['voiceCommand'].toLowerCase() == command.toLowerCase()) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => service['screen']),
+          MaterialPageRoute(builder: (context) => service['screen'] as Widget),
         );
         return;
       }
@@ -271,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => service['screen']),
+                        MaterialPageRoute(builder: (context) => service['screen'] as Widget),
                       );
                     },
                     borderRadius: BorderRadius.circular(12),

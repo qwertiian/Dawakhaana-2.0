@@ -1,18 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'screens/onboarding_screen.dart';
+import 'utils/constants.dart';
+import 'utils/styles.dart';
 import 'config/env.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase without authFlowType
-  await Supabase.initialize(
-    url: Env.supabaseUrl,
-    anonKey: Env.supabaseAnonKey,
-    // authFlowType parameter removed in newer versions
-  );
+  try {
 
-  runApp(const MyApp());
+    // Initialize Supabase
+    await Supabase.initialize(
+      url: Env.supabaseUrl,
+      anonKey: Env.supabaseAnonKey,
+    );
+
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    runApp(const MyApp());
+  } catch (e) {
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Initialization failed: $e'),
+        ),
+      ),
+    ));
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -21,12 +36,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Supabase Flutter',
+      title: 'SympCheck Navigator',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.white,
+        fontFamily: 'Inter',
+        appBarTheme: AppBarTheme(
+          elevation: 0,
+          backgroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.black),
+          titleTextStyle: Styles.appBarTitleStyle,
+        ),
       ),
-      home: const AuthWrapper(),
+      home: const AuthWrapper(), // Changed to use AuthWrapper
     );
   }
 }
@@ -41,29 +64,24 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         final session = Supabase.instance.client.auth.currentSession;
 
-        return session == null
-            ? const LoginScreen()
-            : const HomeScreen();
+        // If user is logged in, go to home screen
+        // If not, show your original onboarding flow
+        return session == null ? const OnboardingScreen() : const HomeScreen();
       },
     );
   }
 }
 
-// Placeholder widgets
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text('Login Screen')));
-  }
-}
-
+// Your existing home screen widget
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text('Home Screen')));
+    return Scaffold(
+      body: Center(
+        child: Text('Home Screen', style: Styles.appBarTitleStyle),
+      ),
+    );
   }
 }

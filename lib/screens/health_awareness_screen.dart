@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'dart:ui'; // For blur effect
 import '/utils/constants.dart';
 import '/utils/styles.dart';
+import 'package:dawakhaana/screens/home_screen.dart';
+import 'package:dawakhaana/screens/ngo_join_screen.dart';
+import 'package:dawakhaana/screens/symptom_checker_screen.dart';
+import 'package:dawakhaana/screens/skin_disease_scanner.dart';
+import 'package:dawakhaana/screens/telemedicine_screen.dart';
+import 'package:dawakhaana/screens/medicine_finder_screen.dart';
+import 'package:dawakhaana/screens/emergency_guide_screen.dart';
 
 class HealthAwarenessScreen extends StatefulWidget {
   const HealthAwarenessScreen({super.key});
@@ -10,208 +18,315 @@ class HealthAwarenessScreen extends StatefulWidget {
 }
 
 class _HealthAwarenessScreenState extends State<HealthAwarenessScreen> {
-  final List<Map<String, dynamic>> _healthTopics = [
+  final List<Map<String, dynamic>> healthServices = [
     {
-      'title': 'Preventive Health',
-      'subtitle': 'Prevent disease before it starts',
-      'count': 2,
+      'title': 'Symptom Checker',
+      'description': 'Check symptoms using AI & get guidance.',
+      'icon': Icons.medical_services,
+      'color': Colors.blue,
+      'screen': const SymptomCheckerScreen(),
+      'voiceCommand': 'symptom checker',
+    },
+    {
+      'title': 'Skin Scanner',
+      'description': 'Scan skin conditions & get AI analysis.',
+      'icon': Icons.camera_alt,
+      'color': Colors.green,
+      'screen': const SkinDiseaseScannerScreen(),
+      'voiceCommand': 'skin scanner',
+    },
+    {
+      'title': 'Telemedicine',
+      'description': 'Connect with doctors remotely.',
+      'icon': Icons.video_call,
+      'color': Colors.purple,
+      'screen': const TelemedicineScreen(),
+      'voiceCommand': 'telemedicine',
+    },
+    {
+      'title': 'Medicine Finder',
+      'description': 'Find medicines in nearby stores.',
+      'icon': Icons.local_pharmacy,
+      'color': Colors.orange,
+      'screen': const MedicineFinderScreen(),
+      'voiceCommand': 'medicine finder',
+    },
+    {
+      'title': 'Emergency Guide',
+      'description': 'Get first aid & emergency help.',
+      'icon': Icons.emergency,
+      'color': Colors.red,
+      'screen': const EmergencyGuideScreen(),
+      'voiceCommand': 'emergency guide',
+    },
+    {
+      'title': 'Health Awareness',
+      'description': 'Learn preventive healthcare tips.',
       'icon': Icons.health_and_safety,
-    },
-    {
-      'title': 'Nutrition Health',
-      'subtitle': 'Healthy eating for better health',
-      'count': 1,
-      'icon': Icons.restaurant,
-    },
-    {
-      'title': 'Mental Health',
-      'subtitle': 'Caring for your emotional wellbeing',
-      'count': 1,
-      'icon': Icons.psychology,
-    },
-    {
-      'title': 'Hygiene Health',
-      'subtitle': 'Clean habits for disease prevention',
-      'count': 1,
-      'icon': Icons.clean_hands,
-    },
-    {
-      'title': 'Maternal Health',
-      'subtitle': 'Care for mothers and babies',
-      'count': 1,
-      'icon': Icons.family_restroom,
+      'color': Colors.teal,
+      'screen': const HealthAwarenessScreen(),
+      'voiceCommand': 'health awareness',
     },
   ];
 
-  final List<Map<String, dynamic>> _featuredArticles = [
-    {
-      'title': 'Maternal and Newborn Care',
-      'content':
-      'Proper care during pregnancy and after birth is crucial for both mother and baby. During pregnancy: Attend antenatal check-ups, take iron and folic acid supplements as prescribed, eat nutritious foods, rest adequately, and know the...',
-      'tags': ['pregnancy', 'childcare', 'health'],
-    },
-    {
-      'title': 'Importance of Vaccination',
-      'content':
-      'Vaccines are one of public health\'s greatest achievements. They protect against serious, sometimes deadly, diseases by stimulating the immune system to recognize and fight pathogens. All children should receive the basic childhood...',
-      'tags': ['vaccines', 'immunization', 'disease prevention'],
-    },
-    {
-      'title': 'Mental Health Awareness',
-      'content':
-      'Mental health is just as important as physical health. Common mental health issues include depression, anxiety, and stress-related disorders. Signs that someone might be struggling include: persistent sadness or worry, withdrawal...',
-      'tags': ['mental health', 'wellbeing', 'stress management'],
-    },
-  ];
+  Widget _buildAppName() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (route) => false,
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [
+              Colors.blue.withOpacity(0.2),
+              Colors.white.withOpacity(0.3),
+              Colors.blue.withOpacity(0.2),
+            ],
+          ),
+          border: Border.all(
+            color: Colors.blue.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Text(
+          'Dawakhaana',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: Colors.blue,
+            letterSpacing: 1.1,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 2,
+                offset: const Offset(1, 1),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showVoiceCommandDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Voice Assistant'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Available voice commands:'),
+            const SizedBox(height: 10),
+            ...healthServices.map((service) =>
+                Text('- ${service['voiceCommand']}', style: Styles.bodyStyle)
+            ),
+            const SizedBox(height: 20),
+            const Text('Tap the mic and say a command',
+                style: TextStyle(fontStyle: FontStyle.italic)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.mic, color: Colors.redAccent),
+            onPressed: () {
+              Navigator.pop(context);
+              _simulateVoiceCommandSelection(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _simulateVoiceCommandSelection(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Select a voice command to simulate'),
+        children: healthServices.map((service) =>
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context);
+                _handleVoiceCommand(service['voiceCommand']);
+              },
+              child: Text(service['title']),
+            )
+        ).toList(),
+      ),
+    );
+  }
+
+  void _handleVoiceCommand(String command) {
+    for (var service in healthServices) {
+      if (service['voiceCommand'].toLowerCase() == command.toLowerCase()) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => service['screen'] as Widget),
+        );
+        return;
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('No service found for command: $command')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Health Awareness'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, size: 32, color: Colors.blue),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: _buildAppName(),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.mic, size: 28, color: Colors.redAccent),
+            onPressed: () => _showVoiceCommandDialog(context),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NGOJoinScreen()),
+              );
+            },
+            child: Text(
+              'Join',
+              style: Styles.buttonTextStyle.copyWith(color: Colors.blue),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Search health topics, events or keywords...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            const Center(
+              child: Text(
+                'Health Awareness',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
-              'Health Articles',
-              style: Styles.headingStyle,
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 180,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _healthTopics.length,
-                itemBuilder: (context, index) {
-                  final topic = _healthTopics[index];
-                  return Container(
-                    width: 160,
-                    margin: const EdgeInsets.only(right: 16),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(topic['icon'], size: 32, color: AppConstants.primaryColor),
-                            const SizedBox(height: 12),
-                            Text(
-                              topic['title'],
-                              style: Styles.subheadingStyle,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              topic['subtitle'],
-                              style: Styles.captionStyle,
-                            ),
-                            const Spacer(),
-                            Text(
-                              '${topic['count']} article${topic['count'] > 1 ? 's' : ''}',
-                              style: Styles.captionStyle.copyWith(color: AppConstants.primaryColor),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
+            const SizedBox(height: 8),
+            const Center(
+              child: Text(
+                'Learn about preventive healthcare and wellness',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
               ),
             ),
             const SizedBox(height: 32),
-            Text(
-              'Featured Articles',
-              style: Styles.headingStyle,
-            ),
-            const SizedBox(height: 16),
-            ..._featuredArticles.map((article) {
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        article['title'],
-                        style: Styles.subheadingStyle,
+
+            // Blurred content with the effect from the second code
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 400,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        article['content'],
-                        style: Styles.bodyStyle,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: (article['tags'] as List).map((tag) {
-                          return Chip(
-                            label: Text(tag),
-                            backgroundColor: Colors.grey[200],
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {},
-                          child: const Text('Read Article'),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              );
-            }),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+                Column(
                   children: [
-                    const Icon(Icons.lightbulb_outline, color: Colors.amber),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Preventive Health Tip',
-                            style: Styles.subheadingStyle,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Small changes in daily habits can significantly improve your health. Stay hydrated, wash hands regularly, eat a balanced diet with local vegetables and fruits, stay active with daily physical work or exercise, and get adequate sleep.',
-                            style: Styles.captionStyle,
-                          ),
-                        ],
+                    const Text(
+                      'Health Awareness Content',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ...List.generate(3, (index) => Container(
+                      height: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: Colors.grey[300],
+                    )),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Text(
+                        'Will be available in the Prototype',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: const Text('Get Daily Health Tips'),
+
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: const Text(
+                'This section will include comprehensive health awareness content including:\n\n'
+                    '• Health articles on various topics\n'
+                    '• Upcoming health events\n'
+                    '• Preventive healthcare tips\n'
+                    '• Nutrition and wellness guides',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
               ),
             ),
           ],
