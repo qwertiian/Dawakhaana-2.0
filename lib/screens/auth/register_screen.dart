@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '/screens/auth/login_screen.dart';
+import 'phone_login_screen.dart';
 import '/screens/auth/otp_verification_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
+import 'package:dawakhaana/services/api_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -16,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   bool _isButtonEnabled = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -33,23 +35,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _validateInputs() {
     final String name = _nameController.text.trim();
-    final String phone = _phoneController.text.trim();
+    final phone = '${_phoneController.text.trim()}';
     setState(() {
       _isButtonEnabled = name.isNotEmpty && phone.length == 10;
     });
   }
 
-  void _navigateToOTPVerification() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OTPVerificationScreen(
-          phoneNumber: _phoneController.text,
-          verificationId: 'dummy_verification_id',
-          isSignUp: true, // This is the key difference
+  Future<void> _handleRegister() async {
+    final name = _nameController.text.trim();
+    final phone = '+91${_phoneController.text.trim()}';
+
+    print('📤 Registering user: name=$name, phone=$phone');
+    setState(() => _isLoading = true);
+
+    try {
+      await ApiService().sendOtp(phone, name: name, mode: 'register');
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OTPVerificationScreen(
+            phone: phone,
+            name: name,
+            mode: 'register',
+          ),
         ),
-      ),
-    );  }
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isButtonEnabled ? _navigateToOTPVerification : null,
+                          onPressed: _isButtonEnabled ? _handleRegister : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppConstants.primaryColor,
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -173,7 +192,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      MaterialPageRoute(builder: (context) => const PhoneLoginScreen()),
                     );
                   },
                   child: Text(

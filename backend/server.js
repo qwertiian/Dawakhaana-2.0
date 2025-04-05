@@ -5,6 +5,7 @@ const cors = require('cors');
 const logger = require('./utils/logger');
 
 // Middleware
+app.set('trust proxy', true);
 app.use(cors());
 app.use(express.json());
 

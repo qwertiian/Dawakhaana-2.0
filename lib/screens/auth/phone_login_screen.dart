@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'otp_verification_screen.dart';
+import 'package:dawakhaana/services/api_service.dart';
 import 'register_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
@@ -14,13 +15,13 @@ class PhoneLoginScreen extends StatefulWidget {
 
 class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
-  final bool _isLoading = false;
   bool _isButtonEnabled = false;
+  bool _isLoading = false;
   String? _errorMessage;
 
   void _validatePhoneInput() {
     setState(() {
-      _isButtonEnabled = _phoneController.text.length == 10;
+      _isButtonEnabled = _phoneController.text.trim().length == 10;
       if (_isButtonEnabled) _errorMessage = null;
     });
   }
@@ -37,17 +38,44 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
     super.dispose();
   }
 
-  void _navigateToOTPVerification() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OTPVerificationScreen(
-          phoneNumber: _phoneController.text,
-          verificationId: 'dummy_verification_id', // For testing without backend
-          isSignUp: false,
+  Future<void> _handleSendOtp() async {
+    final phone = '+91${_phoneController.text.trim()}';
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await ApiService().sendOtp(phone, mode: 'login');
+      // Navigate on success
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OTPVerificationScreen(
+            phone: phone,
+            mode: 'login',
+          ),
         ),
-      ),
-    );
+      );
+    }  catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Login Failed"),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("OK"),
+            )
+          ],
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -111,7 +139,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _isButtonEnabled ? _navigateToOTPVerification : null,
+                          onPressed: _isLoading ? null : _isButtonEnabled ? _handleSendOtp : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _isButtonEnabled && !_isLoading
                                 ? AppConstants.primaryColor
