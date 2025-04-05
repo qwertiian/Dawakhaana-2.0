@@ -3,17 +3,18 @@ import 'package:flutter/services.dart';
 import '../location_access_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
+import 'package:dawakhaana/services/api_service.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
-  final String phoneNumber;
-  final String verificationId;
-  final bool isSignUp;
+  final String phone;
+  final String? name; // Only needed for sign-up
+  final String mode;
 
   const OTPVerificationScreen({
     super.key,
-    required this.phoneNumber,
-    required this.verificationId,
-    required this.isSignUp,
+    required this.phone,
+    this.name,
+    required this.mode
   });
 
   @override
@@ -28,7 +29,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   int _resendAttempts = 0;
   bool _isOTPExpired = false;
   int _otpTimer = 60;
-  final bool _isLoading = false;
+  bool _isLoading = false;
   String? _errorMessage;
 
   @override
@@ -40,19 +41,6 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       });
     });
     _startOTPTimer();
-  }
-
-  void _navigateToLocationScreen() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LocationAccessScreen(isLoginFlow: !widget.isSignUp),
-      ),
-    );
-  }
-
-  void _verifyOTP() {
-    _navigateToLocationScreen();
   }
 
   void _startOTPTimer() {
@@ -72,7 +60,44 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     });
   }
 
-  void _resendOTP() {
+  Future<void> _verifyOTP() async {
+    final otp = _otpController.text.trim();
+    if (otp.length != 6) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Call your Node.js backend API to verify the OTP
+      await ApiService().verifyOtp(widget.phone, otp, name: widget.name);
+
+
+      _navigateToLocationScreen();
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _navigateToLocationScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationAccessScreen(
+          isLoginFlow: widget.name == null,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _resendOTP() async {
     if (!_isResendEnabled) return;
 
     setState(() {
@@ -86,6 +111,15 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     });
 
     _startOTPTimer();
+
+    // Call backend to resend OTP
+    try {
+      await ApiService().sendOtp(widget.phone, name: widget.name, mode: widget.mode);
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    }
 
     Future.delayed(Duration(seconds: _resendCooldown), () {
       if (mounted) {
@@ -138,7 +172,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    "Enter OTP sent to +91${widget.phoneNumber}",
+                    "Enter OTP sent to ${widget.phone}",
                     style: Styles.bodyStyle.copyWith(color: AppConstants.darkGray),
                     textAlign: TextAlign.center,
                   ),

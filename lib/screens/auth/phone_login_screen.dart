@@ -1,55 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '/screens/auth/login_screen.dart';
-import '/screens/auth/otp_verification_screen.dart';
+import 'otp_verification_screen.dart';
+import 'package:dawakhaana/services/api_service.dart';
+import 'register_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class PhoneLoginScreen extends StatefulWidget {
+  const PhoneLoginScreen({super.key});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  _PhoneLoginScreenState createState() => _PhoneLoginScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController _nameController = TextEditingController();
+class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
   bool _isButtonEnabled = false;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  void _validatePhoneInput() {
+    setState(() {
+      _isButtonEnabled = _phoneController.text.trim().length == 10;
+      if (_isButtonEnabled) _errorMessage = null;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _nameController.addListener(_validateInputs);
-    _phoneController.addListener(_validateInputs);
+    _phoneController.addListener(_validatePhoneInput);
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
 
-  void _validateInputs() {
-    final String name = _nameController.text.trim();
-    final String phone = _phoneController.text.trim();
+  Future<void> _handleSendOtp() async {
+    final phone = '+91${_phoneController.text.trim()}';
     setState(() {
-      _isButtonEnabled = name.isNotEmpty && phone.length == 10;
+      _isLoading = true;
+      _errorMessage = null;
     });
-  }
 
-  void _navigateToOTPVerification() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OTPVerificationScreen(
-          phoneNumber: _phoneController.text,
-          verificationId: 'dummy_verification_id',
-          isSignUp: true, // This is the key difference
+    try {
+      await ApiService().sendOtp(phone, mode: 'login');
+      // Navigate on success
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OTPVerificationScreen(
+            phone: phone,
+            mode: 'login',
+          ),
         ),
-      ),
-    );  }
+      );
+    }  catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Login Failed"),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("OK"),
+            )
+          ],
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Create Account",
+                  "Login with Phone",
                   style: Styles.headingStyle.copyWith(
                     fontSize: 32,
                     color: AppConstants.primaryColor,
@@ -93,34 +120,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Column(
                     children: [
                       TextField(
-                        controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: "Full Name",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          errorText: _nameController.text.isNotEmpty &&
-                              !RegExp(r'^[a-zA-Z ]+$').hasMatch(_nameController.text)
-                              ? "Only alphabets and spaces allowed"
-                              : null,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z ]')),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      TextField(
                         controller: _phoneController,
                         decoration: InputDecoration(
                           labelText: "Mobile Number (+91)",
                           prefixText: "+91 ",
+                          errorText: _errorMessage,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          errorText: _phoneController.text.isNotEmpty &&
-                              _phoneController.text.length != 10
-                              ? "Enter valid 10-digit number"
-                              : null,
                         ),
                         keyboardType: TextInputType.phone,
                         maxLength: 10,
@@ -132,16 +139,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isButtonEnabled ? _navigateToOTPVerification : null,
+                          onPressed: _isLoading ? null : _isButtonEnabled ? _handleSendOtp : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppConstants.primaryColor,
+                            backgroundColor: _isButtonEnabled && !_isLoading
+                                ? AppConstants.primaryColor
+                                : Colors.grey,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: Text(
-                            "Verify OTP",
+                          child: _isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : Text(
+                            "Send OTP",
                             style: Styles.buttonTextStyle,
                           ),
                         ),
@@ -150,34 +161,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: AppConstants.darkGray)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        "OR",
-                        style: Styles.captionStyle.copyWith(color: AppConstants.darkGray),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: AppConstants.darkGray)),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "Already have an account?",
-                  style: Styles.bodyStyle,
-                ),
-                const SizedBox(height: 10),
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterScreen(),
+                      ),
                     );
                   },
                   child: Text(
-                    "Login with Phone",
+                    "Don't have an account? Register",
                     style: Styles.linkStyle.copyWith(fontSize: 16),
                   ),
                 ),
