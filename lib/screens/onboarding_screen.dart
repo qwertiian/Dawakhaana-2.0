@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/screens/auth/login_screen.dart';
+import '/screens/auth/phone_login_screen.dart';
 import '/utils/constants.dart';
 import '/utils/styles.dart';
 
@@ -80,7 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
+                          builder: (context) => const PhoneLoginScreen(),
                         ),
                       );
                     } else {

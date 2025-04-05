@@ -1,20 +1,16 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-const _storage = FlutterSecureStorage();
+class SupabaseRealtime {
+  final SupabaseClient _supabase = Supabase.instance.client;
 
-class SecureStorage {
-  static const _keyToken = 'auth_token';
-  static const _keyUserId = 'user_id';
-
-  static Future<void> saveToken(String token) async {
-    await _storage.write(key: _keyToken, value: token);
+  Stream<List<Map<String, dynamic>>> profileChanges(String userId) {
+    return _supabase
+        .from('profiles')
+        .stream(primaryKey: ['id'])
+        .eq('id', userId);
   }
 
-  static Future<String?> getToken() async {
-    return await _storage.read(key: _keyToken);
-  }
-
-  static Future<void> clear() async {
-    await _storage.deleteAll();
+  void dispose() {
+    _supabase.removeAllChannels();
   }
 }

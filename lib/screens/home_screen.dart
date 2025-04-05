@@ -19,14 +19,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<Map<String, dynamic>> healthServices = [
-    {
-      'title': 'Symptom Checker',
-      'description': 'Check symptoms using AI & get guidance.',
-      'icon': Icons.medical_services,
-      'color': Colors.blue,
-      'screen': const SymptomCheckerScreen(),
-      'voiceCommand': 'symptom checker',
-    },
+    // {
+    //   'title': 'Symptom Checker',
+    //   'description': 'Check symptoms using AI & get guidance.',
+    //   'icon': Icons.medical_services,
+    //   'color': Colors.blue,
+    //   'screen': const SymptomCheckerScreen(),
+    //   'voiceCommand': 'symptom checker',
+    // },
     {
       'title': 'Skin Scanner',
       'description': 'Scan skin conditions & get AI analysis.',

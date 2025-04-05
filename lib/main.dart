@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/env.dart';
+import 'screens/auth/phone_login_screen.dart';
+import 'screens/onboarding_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,8 +28,24 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const AuthWrapper(),
+      home: const InitialScreen(),
     );
+  }
+}
+
+class InitialScreen extends StatelessWidget {
+  const InitialScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Check if user has completed onboarding (you might want to use SharedPreferences for this)
+    const hasCompletedOnboarding = false; // Change this based on your logic
+
+    if (!hasCompletedOnboarding) {
+      return const OnboardingScreen();
+    }
+
+    return const AuthWrapper();
   }
 }
 
@@ -42,23 +60,14 @@ class AuthWrapper extends StatelessWidget {
         final session = Supabase.instance.client.auth.currentSession;
 
         return session == null
-            ? const LoginScreen()
+            ? const PhoneLoginScreen()
             : const HomeScreen();
       },
     );
   }
 }
 
-// Placeholder widgets
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text('Login Screen')));
-  }
-}
-
+// Placeholder widget for the home screen
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
