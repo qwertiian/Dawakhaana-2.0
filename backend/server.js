@@ -7,8 +7,8 @@ const logger = require('./utils/logger');
 // Import Routes
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
-const medihelpRoutes = require('./routes/mediahelp'); // Import the medihelp router
-const predictionRoutes = require('./routes/skinDiseaseRoutes');
+const mediahelpRoutes = require('./routes/mediahelp'); // Import the medihelp router
+const skinDiseaseRoutes = require('./routes/skinDiseaseRoutes');
 
 // Middleware
 app.set('trust proxy', true);
@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api/mediahelp', medihelpRoutes); // Mount the medihelp router
+app.use('/api/mediahelp', mediahelpRoutes); // Mount the medihelp router
 app.use('/api/skin', skinDiseaseRoutes);
 
 // Handle 404
