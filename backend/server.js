@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const logger = require('./utils/logger');
+const medihelpRoutes = require("./routes/medihelp");
 
 // Middleware
 app.set('trust proxy', true);
@@ -25,6 +26,7 @@ const profileRoutes = require('./routes/profile');
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use("/api/medihelp", medihelpRoutes);
 
 // Handle 404
 app.use((req, res) => {
